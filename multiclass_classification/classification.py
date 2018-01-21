@@ -47,3 +47,21 @@ print(max_pos)
 print(sgd_clf.classes_)
 
 print('The highest score belongs to class', sgd_clf.classes_[max_pos])
+
+print('Force OvO strategy')
+
+from sklearn.multiclass import OneVsOneClassifier
+ovo_clf = OneVsOneClassifier(SGDClassifier(random_state=42))
+ovo_clf.fit(X_train, y_train)
+result = ovo_clf.predict([some_digit])
+print('Result OvO SGD', result)
+print(len(ovo_clf.estimators_))
+
+print('Use random forest')
+from sklearn.ensemble import RandomForestClassifier
+forest_clf = RandomForestClassifier(random_state=42)
+# random forests are multiclass classifiers, so no OvO or OvA necessary
+forest_clf.fit(X_train, y_train)
+result_forest = forest_clf.predict([some_digit])
+print('Result random forest', result_forest)
+print('Probabilities', forest_clf.predict_proba([some_digit]))
