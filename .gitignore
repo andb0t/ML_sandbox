@@ -1,2 +1,6 @@
 # Project
 *.pdf
+
+# jupyter notebook
+.ipynb_checkpoints
+*/.ipynb_checkpoints/*
