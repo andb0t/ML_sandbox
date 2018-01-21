@@ -51,7 +51,7 @@ if SAVE_PLOTS:
 
 print('Split into train and test data set')
 
-split_strategy = 'sklearn_naive'
+split_strategy = 'stratified'
 
 if split_strategy == 'naive':
     def split_train_test(data, test_ratio):
@@ -111,3 +111,17 @@ elif split_strategy == 'stratified':
         set_.drop('income_cat', axis=1, inplace=True)
 
 print(len(train_set), 'train +', len(test_set), 'test')
+
+housing = train_set.copy()
+
+if SAVE_PLOTS:
+    plt.figure()
+    housing.plot(kind='scatter', x='longitude', y='latitude')
+    plt.savefig('simple_scatter.pdf')
+
+    plt.figure()
+    housing.plot(kind='scatter', x='longitude', y='latitude', alpha=0.4,
+                 s=housing['population']/100, label='population', figsize=(10, 7),
+                 c='median_house_value', cmap=plt.get_cmap('jet'), colorbar=True)
+    plt.legend()
+    plt.savefig('beautyful_scatter.pdf')
