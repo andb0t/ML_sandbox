@@ -115,6 +115,7 @@ print(len(train_set), 'train +', len(test_set), 'test')
 housing = train_set.copy()
 
 if SAVE_PLOTS:
+    print('Plot geographical information')
     plt.figure()
     housing.plot(kind='scatter', x='longitude', y='latitude')
     plt.savefig('simple_scatter.pdf')
@@ -125,3 +126,17 @@ if SAVE_PLOTS:
                  c='median_house_value', cmap=plt.get_cmap('jet'), colorbar=True)
     plt.legend()
     plt.savefig('beautyful_scatter.pdf')
+
+print('Investigate correlations')
+
+corr_matrix = housing.corr()
+print(corr_matrix['median_house_value'].sort_values(ascending=False))
+
+from pandas.plotting import scatter_matrix
+attributes = ['median_house_value', 'median_income',
+              'total_rooms', 'housing_median_age']
+
+if SAVE_PLOTS:
+    plt.figure()
+    scatter_matrix(housing[attributes], figsize=(12, 8))
+    plt.savefig('scatter_matrix.png')
