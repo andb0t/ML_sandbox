@@ -64,6 +64,7 @@ print('f1_score:', f1_score(y_train_5, y_train_pred))
 
 print('Get decision scores:')
 y_scores = cross_val_predict(sgd_clf, X_train, y_train_5, cv=3, method='decision_function')
+
 from sklearn.metrics import precision_recall_curve
 precisions, recalls, thresholds = precision_recall_curve(y_train_5, y_scores)
 
@@ -84,8 +85,26 @@ def plot_precision_vs_recall(prec, rec):
     plt.ylabel('Precision')
     plt.ylim([0, 1])
 
+
+def plot_roc_curve(fpr, tpr, label=None):
+    plt.figure()
+    plt.plot(fpr, tpr, linewidth=2, label=label)
+    plt.plot([0, 1], [0, 1], 'k--')
+    plt.axis([0, 1, 0, 1])
+    plt.xlabel('False Positive Rate')
+    plt.ylabel('True Positive Rate')
+
 plot_precision_recall_vs_threshold(precisions, recalls, thresholds)
 plt.savefig('precision_recall_threshold_curve.pdf')
 
 plot_precision_vs_recall(precisions, recalls)
 plt.savefig('precision_recall_curve.pdf')
+#
+
+from sklearn.metrics import roc_curve, roc_auc_score
+fpr, tpr, thresholds = roc_curve(y_train_5, y_scores)
+plot_roc_curve(fpr, tpr)
+plt.savefig('roc_curve.pdf')
+
+auc = roc_auc_score(y_train_5, y_scores)
+print('AUC', auc)
