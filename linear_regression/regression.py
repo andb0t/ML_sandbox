@@ -107,4 +107,7 @@ elif split_strategy == 'stratified':
     print('Abundance in stratified train set')
     print(train_set['income_cat'].value_counts() / len(train_set))
 
+    for set_ in (train_set, test_set):
+        set_.drop('income_cat', axis=1, inplace=True)
+
 print(len(train_set), 'train +', len(test_set), 'test')
