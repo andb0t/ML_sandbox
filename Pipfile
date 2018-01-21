@@ -15,6 +15,8 @@ sklearn = "*"
 numpy = "*"
 matplotlib = "*"
 tensorflow = "*"
+jupyter = "*"
+scipy = "*"
 
 
 [requires]
