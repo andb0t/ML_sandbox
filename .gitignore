@@ -1,5 +1,7 @@
 # Project
 *.pdf
+*.csv
+*.tgz
 
 # jupyter notebook
 .ipynb_checkpoints
