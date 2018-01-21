@@ -108,3 +108,29 @@ plt.savefig('roc_curve.pdf')
 
 auc = roc_auc_score(y_train_5, y_scores)
 print('AUC', auc)
+
+print('Try random forest')
+
+from sklearn.ensemble import RandomForestClassifier
+
+forest_clf = RandomForestClassifier(random_state=42)
+y_probas_forest = cross_val_predict(forest_clf, X_train, y_train_5, cv=3, method='predict_proba')
+y_scores_forest = y_probas_forest[:, 1]
+fpr_forest, tpr_forest, thresholds_forest = roc_curve(y_train_5, y_scores_forest)
+
+
+def plot_roc_SGD_vs_forest(fpr, tpr, fpr_forest, tpr_forest):
+    plt.figure()
+    plt.plot(fpr, tpr, 'b:', label='SGD')
+    plt.plot(fpr_forest, tpr_forest, label='Random Forest')
+    plt.plot([0, 1], [0, 1], 'k--')
+    plt.axis([0, 1, 0, 1])
+    plt.xlabel('False Positive Rate')
+    plt.ylabel('True Positive Rate')
+    plt.legend(loc='lower right')
+
+plot_roc_SGD_vs_forest(fpr, tpr, fpr_forest, tpr_forest)
+plt.savefig('roc_curve_SGD_vs_forest.pdf')
+
+auc_forest = roc_auc_score(y_train_5, y_scores_forest)
+print('AUC forest', auc)
