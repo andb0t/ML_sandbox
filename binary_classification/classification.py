@@ -15,13 +15,14 @@ print(y.shape)
 some_digit = X[36000]
 
 
-def show_image(some_digit_image):
+def plot_digit(data):
     plt.figure()
-    plt.imshow(some_digit_image, cmap=matplotlib.cm.binary, interpolation='nearest')
-    plt.savefig('example_instance.pdf')
+    image = data.reshape(28, 28)
+    plt.imshow(image, cmap=matplotlib.cm.binary, interpolation="nearest")
+    plt.axis("off")
 
-some_digit_image = some_digit.reshape(28, 28)
-show_image(some_digit_image)
+plot_digit(some_digit)
+plt.savefig('example_instance.pdf')
 
 # Get the test data
 MNIST_TRAIN_DIV = 60000
