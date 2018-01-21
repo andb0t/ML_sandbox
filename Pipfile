@@ -12,6 +12,8 @@ name = "pypi"
 [packages]
 
 sklearn = "*"
+numpy = "*"
+matplotlib = "*"
 
 
 [requires]
