@@ -212,8 +212,8 @@ if strategy == 'by_hand':
     print(encoder.classes_)
 
     from sklearn.preprocessing import OneHotEncoder
-    encoder = OneHotEncoder()
-    housing_cat_1hot = encoder.fit_transform(housing_cat_encoded.reshape(-1, 1))
+    hot_encoder = OneHotEncoder()
+    housing_cat_1hot = hot_encoder.fit_transform(housing_cat_encoded.reshape(-1, 1))
     print(housing_cat_1hot)  # SciPy sparse matrix
     # housing_cat_1hot.toarray()  # (dense) NumPy array
 elif strategy == 'automatically':
@@ -308,3 +308,136 @@ full_pipeline = FeatureUnion(transformer_list=[('num_pipeline', num_pipeline),
 housing_prepared = full_pipeline.fit_transform(housing)
 print(housing_prepared)
 print(housing_prepared.shape)
+
+# -----------------------------------------------------------------------------
+# MODEL SELECTION
+# -----------------------------------------------------------------------------
+
+print('Train a linear regression')
+from sklearn.linear_model import LinearRegression
+
+lin_reg = LinearRegression()
+lin_reg.fit(housing_prepared, housing_labels)
+
+some_data = housing.iloc[:5]
+some_labels = housing_labels.iloc[:5]
+some_data_prepared = full_pipeline.transform(some_data)
+print('Predictions:', lin_reg.predict(some_data_prepared))
+print('Labels:', list(some_labels))
+
+print('Assess accuracy of model')
+from sklearn.metrics import mean_squared_error
+housing_predictions = lin_reg.predict(housing_prepared)
+lin_mse = mean_squared_error(housing_labels, housing_predictions)
+lin_rmse = np.sqrt(lin_mse)
+print('RMSE:', lin_rmse)
+
+print('Train decision tree')
+from sklearn.tree import DecisionTreeRegressor
+tree_reg = DecisionTreeRegressor()
+tree_reg.fit(housing_prepared, housing_labels)
+housing_predictions = tree_reg.predict(housing_prepared)
+tree_mse = mean_squared_error(housing_labels, housing_predictions)
+tree_rmse = np.sqrt(tree_mse)
+print('RMSE:', tree_rmse)
+
+print('Train random forest regression')
+from sklearn.ensemble import RandomForestRegressor
+forest_reg = RandomForestRegressor()
+forest_reg.fit(housing_prepared, housing_labels)
+housing_predictions = tree_reg.predict(housing_prepared)
+forest_mse = mean_squared_error(housing_labels, housing_predictions)
+forest_rmse = np.sqrt(forest_mse)
+print('RMSE:', forest_rmse)
+
+print('Store models and their parameters')
+storage_strategy = 'sklearn'
+
+if storage_strategy == 'sklearn':
+    from sklearn.externals import joblib
+    joblib.dump(forest_reg, 'forest_reg_sklearn.pkl')
+    # forest_reg_loaded = joblib.load('forest_reg_sklearn.pkl')
+elif storage_strategy == 'pickle':
+    import pickle
+    pickle.dump(forest_reg, open('forest_reg_pickle.pkl', 'wb'))
+    # forest_reg_loaded = pickle.load( open( "forest_reg_pickle.pkl", "rb" ) )
+
+# -----------------------------------------------------------------------------
+# CROSS VALIDATION
+# -----------------------------------------------------------------------------
+
+def display_scores(scores, label=''):
+    if label:
+        print('Scores for', label)
+    print('Scores:', scores)
+    print('Mean:', scores.mean())
+    print('Standard deviation:', scores.std())
+
+from sklearn.model_selection import cross_val_score
+
+lin_scores = cross_val_score(lin_reg, housing_prepared, housing_labels,
+                             scoring='neg_mean_squared_error', cv=10)
+lin_rmse_scores = np.sqrt(-lin_scores)
+display_scores(lin_rmse_scores, 'linear regression')
+
+tree_scores = cross_val_score(tree_reg, housing_prepared, housing_labels,
+                              scoring='neg_mean_squared_error', cv=10)
+tree_rmse_scores = np.sqrt(-tree_scores)
+display_scores(tree_rmse_scores, 'single decision tree')
+
+forest_scores = cross_val_score(forest_reg, housing_prepared, housing_labels,
+                                scoring='neg_mean_squared_error', cv=10)
+forest_rmse_scores = np.sqrt(-forest_scores)
+display_scores(forest_rmse_scores, 'decision tree forest')
+
+# -----------------------------------------------------------------------------
+# MODEL TUNING
+# -----------------------------------------------------------------------------
+
+print('Tune the random forest model hyperparameters')
+
+grid_strategy = 'grid_search'
+
+if grid_strategy == 'grid_search':
+    from sklearn.model_selection import GridSearchCV as SearchCV
+elif grid_strategy == 'random_search':  # TODO: needs to be debugged
+    from sklearn.model_selection import RandomizedSearchCV as SearchCV
+
+param_grid = [
+    {'n_estimators': [3, 10, 30], 'max_features': [2, 4, 6, 8]},
+    {'bootstrap': [False], 'n_estimators': [3, 10], 'max_features': [2, 3, 4]},
+    ]
+
+forest_reg = RandomForestRegressor()
+grid_search = SearchCV(forest_reg, param_grid, cv=5,
+                       scoring='neg_mean_squared_error')
+grid_search.fit(housing_prepared, housing_labels)
+print(grid_search.best_params_)
+print(grid_search.best_estimator_)
+cvres = grid_search.cv_results_
+for mean_score, params in zip(cvres['mean_test_score'], cvres['params']):
+    print(np.sqrt(-mean_score), params)
+
+feature_importances = grid_search.best_estimator_.feature_importances_
+print(feature_importances)
+extra_attribs = ['rooms_per_hhold', 'pop_per_hhold', 'bedrooms_per_room']
+cat_one_hot_attribs = list(encoder.classes_)
+attributes = num_attribs + extra_attribs + cat_one_hot_attribs
+print(sorted(zip(feature_importances, attributes), reverse=True))
+
+# -----------------------------------------------------------------------------
+# EVALUATE ON TEST SET
+# -----------------------------------------------------------------------------
+print('Evaluate test set')
+final_model = grid_search.best_estimator_
+
+X_test = test_set.drop('median_house_value',axis=1)
+y_test = test_set['median_house_value'].copy()
+
+X_test_prepared = full_pipeline.transform(X_test)
+
+final_predictions = final_model.predict(X_test_prepared)
+
+final_mse = mean_squared_error(y_test, final_predictions)
+final_rmse = np.sqrt(final_mse)
+print('RMSE on test set:', final_rmse)

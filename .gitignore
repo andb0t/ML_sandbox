@@ -1,8 +1,11 @@
-# Project
+# project
 *.pdf
 *.png
 *.csv
 *.tgz
+
+# python
+*.pkl
 
 # jupyter notebook
 .ipynb_checkpoints
