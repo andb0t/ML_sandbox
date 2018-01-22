@@ -21,7 +21,7 @@ print('Define model')
 
 SVM_kernel = 'gaussian_rbf'
 
-if SVM_kernel == 'linear':
+if SVM_kernel == 'linear_optimized':
     polynomial_svm_clf = Pipeline((
         ('poly_features', PolynomialFeatures(degree=3)),
         ('scaler', StandardScaler()),
