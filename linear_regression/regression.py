@@ -8,6 +8,7 @@ from six.moves import urllib
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+import scipy
 
 
 SAVE_PLOTS = False
@@ -404,6 +405,7 @@ display_scores(forest_rmse_scores, 'decision tree forest')
 
 print('Tune the random forest model hyperparameters')
 
+forest_reg = RandomForestRegressor()
 grid_strategy = 'random_search'
 
 if grid_strategy == 'grid_search':
@@ -412,17 +414,17 @@ if grid_strategy == 'grid_search':
         {'n_estimators': [3, 10, 30], 'max_features': [2, 4, 6, 8]},
         {'bootstrap': [False], 'n_estimators': [3, 10], 'max_features': [2, 3, 4]},
         ]
+    grid_search = SearchCV(forest_reg, param_grid, cv=5,
+                           scoring='neg_mean_squared_error')
 elif grid_strategy == 'random_search':
-    from scipy.stats import randint as sp_randint  # flat pdf
     from sklearn.model_selection import RandomizedSearchCV as SearchCV
     param_grid = {'bootstrap': [True, False],
-                  'n_estimators': sp_randint(1, 30),
-                  'max_features': sp_randint(1, 10),
+                  'n_estimators': scipy.stats.randint(1, 30),
+                  'max_features': scipy.stats.randint(1, 10),
                   }
+    grid_search = SearchCV(forest_reg, param_grid, cv=5, n_iter=10,
+                           scoring='neg_mean_squared_error')
 
-forest_reg = RandomForestRegressor()
-grid_search = SearchCV(forest_reg, param_grid, cv=5,
-                       scoring='neg_mean_squared_error')
 grid_search.fit(housing_prepared, housing_labels)
 print(grid_search.best_params_)
 print(grid_search.best_estimator_)
