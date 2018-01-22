@@ -1,5 +1,5 @@
 # ML_sandbox
-Test area for machine learning algos
+Test area for machine learning algorithms
 
 ## Instructions
 * use the pipenv package manager to easily set the environment up.
