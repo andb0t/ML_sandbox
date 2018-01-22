@@ -4,7 +4,8 @@ import urllib
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import sklearn.linear_model
+from sklearn.linear_model import LinearRegression
+from sklearn.svm import LinearSVR
 
 GDP_URL = 'https://raw.githubusercontent.com/ageron/handson-ml/master/datasets/lifesat/gdp_per_capita.csv'
 SAT_URL = 'https://raw.githubusercontent.com/ageron/handson-ml/master/datasets/lifesat/oecd_bli_2015.csv'
@@ -58,7 +59,11 @@ country_stats.plot(kind='scatter', x='GDP per capita', y='Life satisfaction')
 plt.savefig('life_satisfaction.pdf')
 
 # Select a linear model
-lin_reg = sklearn.linear_model.LinearRegression()
+regression_model = 'LinearRegression'
+if regression_model == 'LinearRegression':
+    lin_reg = LinearRegression()
+elif regression_model == 'SVM':
+    lin_reg = LinearSVR(epsilon=1.5)
 
 # Train the model
 print('Train the model')
