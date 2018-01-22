@@ -60,9 +60,11 @@ plt.savefig('life_satisfaction.pdf')
 # Select a linear model
 lin_reg = sklearn.linear_model.LinearRegression()
 
-# Train the mode
+# Train the model
+print('Train the model')
 lin_reg.fit(X, y)
 
 # Make a prediction for Cyprus
 X_new = [[22587]]  # Cyprus' GDP per capita
-print(lin_reg.predict(X_new))
+result = lin_reg.predict(X_new)
+print('Prediction for Cyprus:', result)
