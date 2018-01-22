@@ -1,3 +1,5 @@
+# Analysis goal: predict housing prices in California
+
 import os
 import sys
 import tarfile

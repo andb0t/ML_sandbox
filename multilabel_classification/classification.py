@@ -1,3 +1,5 @@
+# Analysis goal: decide if MNIST picture is an odd number >= 7
+
 import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np

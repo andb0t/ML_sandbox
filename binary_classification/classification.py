@@ -1,3 +1,5 @@
+# Analysis goal: differentiate MNIST 5s from non-5s
+
 import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
