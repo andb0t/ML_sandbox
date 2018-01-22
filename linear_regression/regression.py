@@ -315,7 +315,6 @@ print(housing_prepared.shape)
 
 print('Train a linear regression')
 from sklearn.linear_model import LinearRegression
-
 lin_reg = LinearRegression()
 lin_reg.fit(housing_prepared, housing_labels)
 
@@ -341,11 +340,20 @@ tree_mse = mean_squared_error(housing_labels, housing_predictions)
 tree_rmse = np.sqrt(tree_mse)
 print('RMSE:', tree_rmse)
 
+print('Train support vector machine')
+from sklearn.svm import SVR
+svm_reg = SVR()
+svm_reg.fit(housing_prepared, housing_labels)
+housing_predictions = svm_reg.predict(housing_prepared)
+svm_mse = mean_squared_error(housing_labels, housing_predictions)
+svm_rmse = np.sqrt(svm_mse)
+print('RMSE:', svm_rmse)
+
 print('Train random forest regression')
 from sklearn.ensemble import RandomForestRegressor
 forest_reg = RandomForestRegressor()
 forest_reg.fit(housing_prepared, housing_labels)
-housing_predictions = tree_reg.predict(housing_prepared)
+housing_predictions = forest_reg.predict(housing_prepared)
 forest_mse = mean_squared_error(housing_labels, housing_predictions)
 forest_rmse = np.sqrt(forest_mse)
 print('RMSE:', forest_rmse)
