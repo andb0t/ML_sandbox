@@ -1,4 +1,5 @@
 import os
+import sys
 import tarfile
 from six.moves import urllib
 
@@ -8,6 +9,10 @@ import pandas as pd
 
 
 SAVE_PLOTS = False
+
+# -----------------------------------------------------------------------------
+# DATA LOADING
+# -----------------------------------------------------------------------------
 
 print('Download the data')
 DOWNLOAD_ROOT = 'https://github.com/ageron/handson-ml/raw/master/'
@@ -48,6 +53,10 @@ if SAVE_PLOTS:
     plt.figure()
     housing.hist(bins=50, figsize=(20, 15))
     plt.savefig('housing.pdf')
+
+# -----------------------------------------------------------------------------
+# DATA SPLITTING
+# -----------------------------------------------------------------------------
 
 print('Split into train and test data set')
 
@@ -112,6 +121,10 @@ elif split_strategy == 'stratified':
 
 print(len(train_set), 'train +', len(test_set), 'test')
 
+# -----------------------------------------------------------------------------
+# DATA EXPLORATION
+# -----------------------------------------------------------------------------
+
 housing = train_set.copy()
 
 if SAVE_PLOTS:
@@ -140,3 +153,156 @@ if SAVE_PLOTS:
     plt.figure()
     scatter_matrix(housing[attributes], figsize=(12, 8))
     plt.savefig('scatter_matrix.png')
+
+print('Experiment with attribute combinations')
+
+housing['rooms_per_household'] = housing['total_rooms'] / housing['households']
+housing['bedrooms_per_room'] = housing['total_bedrooms'] / housing['total_rooms']
+housing['population_per_household'] = housing['population'] / housing['households']
+
+corr_matrix = housing.corr()
+print(corr_matrix['median_house_value'].sort_values(ascending=False))
+
+# -----------------------------------------------------------------------------
+# DATA PREPROCESSING
+# -----------------------------------------------------------------------------
+
+print('Preprocess data')
+
+housing = train_set.drop('median_house_value', axis=1)
+housing_labels = train_set['median_house_value'].copy()
+
+print('Data cleaning')
+
+housing_num = housing.drop('ocean_proximity', axis=1)
+
+missing_strategy = 'imputer_fill_median'
+
+if missing_strategy == 'drop_instances':
+    housing = housing.dropna(subset=['total_bedrooms'])
+
+elif missing_strategy == 'drop_columns':
+    housing = housing.drop('total_bedrooms', axis=1)
+
+elif missing_strategy == 'fill_median':
+    median = housing['total_bedrooms'].median()
+    housing['total_bedrooms'].fillna(median, inplace=True)
+
+elif missing_strategy == 'imputer_fill_median':
+    from sklearn.preprocessing import Imputer
+    imputer = Imputer(strategy='median')
+    imputer.fit(housing_num)
+    print(imputer.statistics_)
+    print(housing.median().values)
+    X = imputer.transform(housing_num)
+    housing_tr = pd.DataFrame(X, columns=housing_num.columns)
+
+print('Convert text to numbers')
+
+housing_cat = housing['ocean_proximity']
+strategy = 'by_hand'
+
+if strategy == 'by_hand':
+    from sklearn.preprocessing import LabelEncoder
+    encoder = LabelEncoder()
+    housing_cat_encoded = encoder.fit_transform(housing_cat)
+    print(housing_cat_encoded)
+    print(encoder.classes_)
+
+    from sklearn.preprocessing import OneHotEncoder
+    encoder = OneHotEncoder()
+    housing_cat_1hot = encoder.fit_transform(housing_cat_encoded.reshape(-1, 1))
+    print(housing_cat_1hot)  # SciPy sparse matrix
+    # housing_cat_1hot.toarray()  # (dense) NumPy array
+elif strategy == 'automatically':
+    from sklearn.preprocessing import LabelBinarizer
+    encoder = LabelBinarizer(sparse_output=True)
+    housing_cat_1hot = encoder.fit_transform(housing_cat)
+    print(housing_cat_1hot)
+
+print('Write transformer class for pipeline')
+
+from sklearn.base import BaseEstimator, TransformerMixin
+
+rooms_ix, bedrooms_ix, population_ix, household_ix = 3, 4, 5, 6
+
+
+class CombinedAttributesAdder(BaseEstimator, TransformerMixin):
+    def __init__(self, add_bedrooms_per_room=True):
+        # no *args, **kargs to make use of BaseEstimator class
+        # other args can be steered later as hyperparameters
+        self.add_bedrooms_per_room = add_bedrooms_per_room
+
+    def fit(self, X, y=None):
+        return self  # nothing to do
+
+    def transform(self, X, y=None):
+        rooms_per_household = X[:, rooms_ix] / X[:, household_ix]
+        population_per_household = X[:, population_ix] / X[:, household_ix]
+        if self.add_bedrooms_per_room:
+            bedrooms_per_room = X[:, bedrooms_ix] / X[:, rooms_ix]
+            return np.c_[X, rooms_per_household, population_per_household,
+                         bedrooms_per_room]
+        else:
+            return np.c_[X, rooms_per_household, population_per_household]
+
+attr_adder = CombinedAttributesAdder(add_bedrooms_per_room=False)
+housing_extra_attribs = attr_adder.transform(housing.values)
+
+print('Custom transformer dataframe -> NumPy array')
+
+class DataFrameSelector(BaseEstimator, TransformerMixin):
+    def __init__(self, attribute_names):
+        self.attribute_names = attribute_names
+    def fit(self, X, y=None):
+        return self
+    def transform(self, X, y=None):
+        return X[self.attribute_names].values
+
+num_attribs = list(housing_num)
+cat_attribs = ['ocean_proximity']
+
+
+print('Custom label binarizer to make new version of LabelBinarizer work')
+
+class LabelBinarizer_new(TransformerMixin, BaseEstimator):
+    def __init__(self):
+        self.encoder = None
+    def fit(self, X, y=0):
+        return self
+    def transform(self, X, y=0):
+        if(self.encoder is None):
+            print("Initializing encoder")
+            self.encoder = LabelBinarizer()
+            result = self.encoder.fit_transform(X)
+        else:
+            result = self.encoder.transform(X)
+        return result
+
+print('Pipeline for transformation and feature scaling')
+
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import LabelBinarizer
+
+num_pipeline = Pipeline([('selector', DataFrameSelector(num_attribs)),
+                         ('imputer', Imputer(strategy='median')),
+                         ('attribs_adder', CombinedAttributesAdder()),
+                         ('std_scaler', StandardScaler()),
+                         ])
+
+housing_num_tr = num_pipeline.fit_transform(housing_num)
+
+cat_pipeline = Pipeline([('selector', DataFrameSelector(cat_attribs)),
+                         ('label_binarizer', LabelBinarizer_new()),
+                         ])
+
+from sklearn.pipeline import FeatureUnion
+
+full_pipeline = FeatureUnion(transformer_list=[('num_pipeline', num_pipeline),
+                                               ('cat_pipeline', cat_pipeline),
+                                               ])
+
+housing_prepared = full_pipeline.fit_transform(housing)
+print(housing_prepared)
+print(housing_prepared.shape)
