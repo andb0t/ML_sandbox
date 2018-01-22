@@ -341,8 +341,8 @@ tree_rmse = np.sqrt(tree_mse)
 print('RMSE:', tree_rmse)
 
 print('Train support vector machine')
-from sklearn.svm import SVR
-svm_reg = SVR()
+from sklearn.svm import LinearSVR
+svm_reg = LinearSVR()
 svm_reg.fit(housing_prepared, housing_labels)
 housing_predictions = svm_reg.predict(housing_prepared)
 svm_mse = mean_squared_error(housing_labels, housing_predictions)
@@ -404,17 +404,21 @@ display_scores(forest_rmse_scores, 'decision tree forest')
 
 print('Tune the random forest model hyperparameters')
 
-grid_strategy = 'grid_search'
+grid_strategy = 'random_search'
 
 if grid_strategy == 'grid_search':
     from sklearn.model_selection import GridSearchCV as SearchCV
-elif grid_strategy == 'random_search':  # TODO: needs to be debugged
+    param_grid = [
+        {'n_estimators': [3, 10, 30], 'max_features': [2, 4, 6, 8]},
+        {'bootstrap': [False], 'n_estimators': [3, 10], 'max_features': [2, 3, 4]},
+        ]
+elif grid_strategy == 'random_search':
+    from scipy.stats import randint as sp_randint  # flat pdf
     from sklearn.model_selection import RandomizedSearchCV as SearchCV
-
-param_grid = [
-    {'n_estimators': [3, 10, 30], 'max_features': [2, 4, 6, 8]},
-    {'bootstrap': [False], 'n_estimators': [3, 10], 'max_features': [2, 3, 4]},
-    ]
+    param_grid = {'bootstrap': [True, False],
+                  'n_estimators': sp_randint(1, 30),
+                  'max_features': sp_randint(1, 10),
+                  }
 
 forest_reg = RandomForestRegressor()
 grid_search = SearchCV(forest_reg, param_grid, cv=5,
