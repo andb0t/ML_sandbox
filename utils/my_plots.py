@@ -76,6 +76,9 @@ def plot_reg_train_scatter(X, y, clf,
         prediction = clf.predict(X)
         ax.plot(X, prediction, color='orange', linewidth=3, alpha=alpha)
 
+    X = np.asarray(X)
+    y = np.asarray(y)
+
     X0 = X[:, 0]
     X_grid = make_grid(X0)
 

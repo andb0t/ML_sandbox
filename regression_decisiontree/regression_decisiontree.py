@@ -1,8 +1,12 @@
 import os
+import sys
 
 import numpy as np
 from sklearn.tree import DecisionTreeRegressor
 from sklearn.tree import export_graphviz
+
+sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), '../utils'))
+import my_plots
 
 
 print('Generate dataset')
@@ -34,3 +38,6 @@ print('Use model')
 print('(predicted value = average of all training instances in leaf)')
 result = tree_reg.predict([[0.6]])
 print('Result', result)
+
+print('Visualize training')
+my_plots.plot_reg_train_scatter(X, y, tree_reg)

@@ -16,8 +16,8 @@ def poly_noise(x, noise=0):
     return a + b * x + c * x ** 2 + noise * np.random.randn()
 
 x = 2 * np.random.random(100) - 1
-X = np.asarray(list(map(lambda x: [x], x)))
-y = np.asarray(list(map(lambda x: [poly_noise(x, noise=0.5)], x)))
+X = list(map(lambda x: [x], x))
+y = list(map(lambda x: [poly_noise(x, noise=0.5)], x))
 
 print('Plot it')
 fig = plt.figure()
