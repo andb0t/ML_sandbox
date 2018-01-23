@@ -1,4 +1,5 @@
 import os
+import sys
 import urllib
 
 import matplotlib.pyplot as plt
@@ -6,6 +7,10 @@ import numpy as np
 import pandas as pd
 from sklearn.linear_model import LinearRegression
 from sklearn.svm import LinearSVR
+
+sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), '../utils'))
+import my_plots
+
 
 GDP_URL = 'https://raw.githubusercontent.com/ageron/handson-ml/master/datasets/lifesat/gdp_per_capita.csv'
 SAT_URL = 'https://raw.githubusercontent.com/ageron/handson-ml/master/datasets/lifesat/oecd_bli_2015.csv'
@@ -69,7 +74,15 @@ elif regression_model == 'SVM':
 print('Train the model')
 lin_reg.fit(X, y)
 
+print(type(X))
+print(type(X[0]))
+print(X)
+print(y)
+
 # Make a prediction for Cyprus
 X_new = [[22587]]  # Cyprus' GDP per capita
 result = lin_reg.predict(X_new)
 print('Prediction for Cyprus:', result)
+
+print('Visualize training')
+my_plots.plot_reg_train_scatter(X, y, lin_reg)

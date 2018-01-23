@@ -6,7 +6,7 @@ def plot_clf_train_scatter(X, y, clf,
                            x_label='X[0]',
                            y_label='X[1]',
                            title='Training results',
-                           save_name='None'):
+                           save_name='clf_model.png'):
 
     def make_meshgrid(x, y, h=.02):
         """Create a mesh of points to plot in
@@ -21,8 +21,10 @@ def plot_clf_train_scatter(X, y, clf,
         -------
         xx, yy : ndarray
         """
-        x_min, x_max = x.min() - 1, x.max() + 1
-        y_min, y_max = y.min() - 1, y.max() + 1
+        x_range = x.max() - x.min()
+        x_min, x_max = x.min() - x_range * 0.1, x.max() + x_range * 0.1
+        y_range = y.max() - y.min()
+        x_min, x_max = y.min() - y_range * 0.1, y.max() + y_range * 0.1
         xx, yy = np.meshgrid(np.arange(x_min, x_max, h),
                              np.arange(y_min, y_max, h))
         return xx, yy
@@ -54,4 +56,35 @@ def plot_clf_train_scatter(X, y, clf,
     plt.title(title)
     plt.xlim(xx.min(), xx.max())
     plt.ylim(yy.min(), yy.max())
+    plt.savefig(save_name)
+
+
+def plot_reg_train_scatter(X, y, clf,
+                           x_label='x',
+                           y_label='y',
+                           title='Training results',
+                           save_name='reg_model.png'):
+
+    def make_meshgrid(x, h=500):
+        x_range = x.max() - x.min()
+        x_min, x_max = x.min() - x_range * 0.1, x.max() + x_range * 0.1
+        xx = np.meshgrid(np.arange(x_min, x_max, h))
+        return xx
+
+    def plot_regression(ax, clf, X, alpha=0.8):
+        prediction = clf.predict(X)
+        ax.plot(X, prediction, color='orange', linewidth=3, alpha=alpha)
+
+    X0 = X[:, 0]
+    xx = make_meshgrid(X0)[0]
+
+    plt.figure()
+    plot_regression(plt, clf, X)
+    plt.scatter(X0, y, s=20)
+    plt.xlabel(x_label)
+    plt.ylabel(y_label)
+    plt.title(title)
+    # plt.xlim(xx.min(), xx.max())
+    # y_range = y.max() - y.min()
+    # plt.ylim(y.min() - y_range * 0.1, y.max() + y_range * 0.1)
     plt.savefig(save_name)
