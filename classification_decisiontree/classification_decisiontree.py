@@ -10,7 +10,7 @@ X = iris.data[:, 2:]  # petal length and witdh
 y = iris.target
 
 print('Train decision tree classifier')
-tree_clf = DecisionTreeClassifier(max_depth=2)
+tree_clf = DecisionTreeClassifier(max_depth=2, random_state=42)
 tree_clf.fit(X, y)
 
 print('Display tree structure')

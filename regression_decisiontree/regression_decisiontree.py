@@ -17,7 +17,7 @@ X = list(map(lambda x: [x], x))
 y = list(map(lambda x: poly_noise(x, noise=0.5), x))
 
 print('Define and train decision tree regressor')
-tree_reg = DecisionTreeRegressor(max_depth=2)
+tree_reg = DecisionTreeRegressor(max_depth=2, random_state=42)
 tree_reg.fit(X, y)
 
 print('Display decision tree')
