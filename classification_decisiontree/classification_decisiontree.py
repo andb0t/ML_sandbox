@@ -14,6 +14,9 @@ tree_clf.fit(X, y)
 print('Display tree structure')
 from sklearn.tree import export_graphviz
 
+print('feature_names', iris.feature_names[2:])
+print('target_names', iris.target_names)
+
 export_graphviz(
     tree_clf,
     out_file='iris_tree.dot',
@@ -24,3 +27,9 @@ export_graphviz(
     )
 
 os.system('dot -Tpng iris_tree.dot -o iris_tree.png')
+
+print('Get probabilities')
+probs = tree_clf.predict_proba([[5, 1.5]])
+print('Probabilities', probs)
+result = tree_clf.predict([[5, 1.5]])
+print('Result', result)
