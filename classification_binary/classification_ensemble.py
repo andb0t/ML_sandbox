@@ -2,11 +2,13 @@ import os
 import sys
 
 from sklearn.datasets import make_moons
+from sklearn.ensemble import BaggingClassifier
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.ensemble import VotingClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
+from sklearn.tree import DecisionTreeClassifier
 from sklearn.svm import SVC
 
 sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), '../utils'))
@@ -25,8 +27,7 @@ rnd_clf = RandomForestClassifier()
 svm_clf = SVC()
 svm_clf_with_prob = SVC(probability=True)
 
-voting_strat = 'hard'
-
+voting_strat = 'soft'
 if voting_strat == 'hard':
     voting_clf = VotingClassifier(
         estimators=[('lr', log_clf), ('rf', rnd_clf), ('svc', svm_clf)],
@@ -36,8 +37,20 @@ if voting_strat == 'soft':
         estimators=[('lr', log_clf), ('rf', rnd_clf), ('svc', svm_clf_with_prob)],
         voting='soft')
 
+sampling_strat = 'bagging'
+if sampling_strat == 'bagging':
+    bag_clf = BaggingClassifier(
+        DecisionTreeClassifier(), n_estimators=500,
+        max_samples=100, bootstrap=True, n_jobs=-1)
+elif sampling_strat == 'pasting':
+    bag_clf = BaggingClassifier(
+        DecisionTreeClassifier(), n_estimators=500,
+        max_samples=100, bootstrap=False, n_jobs=-1)
+
+tree_clf = DecisionTreeClassifier()
+
 print('Train all of them and check their accuracy')
-for clf in (log_clf, rnd_clf, svm_clf, voting_clf):
+for clf in (log_clf, rnd_clf, svm_clf, voting_clf, bag_clf, tree_clf):
     clf.fit(X_train, y_train)
     y_pred = clf.predict(X_test)
     name = clf.__class__.__name__
