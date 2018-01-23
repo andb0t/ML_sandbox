@@ -1,6 +1,8 @@
 import os
+
 from sklearn.datasets import load_iris
 from sklearn.tree import DecisionTreeClassifier
+from sklearn.tree import export_graphviz
 
 print('Load data')
 iris = load_iris()
@@ -12,7 +14,6 @@ tree_clf = DecisionTreeClassifier(max_depth=2)
 tree_clf.fit(X, y)
 
 print('Display tree structure')
-from sklearn.tree import export_graphviz
 
 print('feature_names', iris.feature_names[2:])
 print('target_names', iris.target_names)
@@ -25,7 +26,6 @@ export_graphviz(
     rounded=True,
     filled=True,
     )
-
 os.system('dot -Tpng iris_tree.dot -o iris_tree.png')
 
 print('Get probabilities')
