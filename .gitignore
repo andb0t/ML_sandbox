@@ -3,6 +3,7 @@
 *.png
 *.csv
 *.tgz
+*.dot
 
 # python
 *.pkl
