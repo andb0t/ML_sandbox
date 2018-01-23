@@ -1,3 +1,6 @@
+import os
+import sys
+
 import matplotlib.pyplot as plt
 from sklearn.datasets import make_moons
 from sklearn.pipeline import Pipeline
@@ -5,6 +8,9 @@ from sklearn.preprocessing import PolynomialFeatures
 from sklearn.preprocessing import StandardScaler
 from sklearn.svm import LinearSVC
 from sklearn.svm import SVC
+
+sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), '../utils'))
+import my_plots
 
 print('Generate toy data')
 X, y = make_moons(n_samples=100, noise=0.1, random_state=42)
@@ -45,3 +51,9 @@ print('Apply model')
 X_test, y_test = make_moons(n_samples=1, noise=None, random_state=42)
 result = polynomial_svm_clf.predict(X_test)
 print('Predicted', result, 'Real', y_test)
+
+print('Visualize decision boundaries')
+
+my_plots.plot_clf_train_scatter(X, y, polynomial_svm_clf,
+    save_name='svm_nonlinear_decision_boundaries.png'
+    )

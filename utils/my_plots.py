@@ -2,11 +2,11 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
-def plot_classifier_training_scatter(X, y, clf,
-                                     x_label='X[0]',
-                                     y_label='X[1]',
-                                     title='Training results',
-                                     save_name='None'):
+def plot_clf_train_scatter(X, y, clf,
+                           x_label='X[0]',
+                           y_label='X[1]',
+                           title='Training results',
+                           save_name='None'):
 
     def make_meshgrid(x, y, h=.02):
         """Create a mesh of points to plot in

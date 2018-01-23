@@ -1,3 +1,6 @@
+import os
+import sys
+
 import numpy as np
 from sklearn import datasets
 from sklearn.linear_model import SGDClassifier
@@ -6,6 +9,8 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.svm import LinearSVC
 from sklearn.svm import SVC
 
+sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), '../utils'))
+import my_plots
 
 iris = datasets.load_iris()
 print(type(iris))
@@ -40,3 +45,11 @@ svm_clf.fit(X, y)
 
 result = svm_clf.predict([[5.5, 1.7]])
 print('Result:', result)
+
+print('Visualize decision boundaries')
+
+my_plots.plot_clf_train_scatter(X, y, svm_clf,
+    x_label=iris.feature_names[2],
+    y_label=iris.feature_names[3],
+    save_name='svm_linear_decision_boundaries.png'
+    )

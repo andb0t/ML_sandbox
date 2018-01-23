@@ -43,4 +43,7 @@ print('Result', result)
 
 print('Visualize decision boundaries')
 
-my_plots.plot_classifier_training_scatter(X, y, tree_clf, x_label=iris.feature_names[2], y_label=iris.feature_names[3], save_name='decision_boundaries.png')
+my_plots.plot_clf_train_scatter(X, y, tree_clf,
+    x_label=iris.feature_names[2],
+    y_label=iris.feature_names[3],
+    save_name='decision_tree_decision_boundaries.png')
