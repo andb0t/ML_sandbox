@@ -65,10 +65,11 @@ def plot_reg_train_scatter(X, y, clf,
                            title='Training results',
                            save_name='reg_model.png'):
 
-    def make_meshgrid(x, h=500):
+    def make_grid(x, n_points=100):
         x_range = x.max() - x.min()
         x_min, x_max = x.min() - x_range * 0.1, x.max() + x_range * 0.1
-        xx = np.meshgrid(np.arange(x_min, x_max, h))
+        xx = np.arange(x_min, x_max, (x_max - x_min)/n_points)
+        xx = list(map(lambda el: [el], xx))
         return xx
 
     def plot_regression(ax, clf, X, alpha=0.8):
@@ -76,15 +77,12 @@ def plot_reg_train_scatter(X, y, clf,
         ax.plot(X, prediction, color='orange', linewidth=3, alpha=alpha)
 
     X0 = X[:, 0]
-    xx = make_meshgrid(X0)[0]
+    X_grid = make_grid(X0)
 
     plt.figure()
-    plot_regression(plt, clf, X)
+    plot_regression(plt, clf, X_grid)
     plt.scatter(X0, y, s=20)
     plt.xlabel(x_label)
     plt.ylabel(y_label)
     plt.title(title)
-    # plt.xlim(xx.min(), xx.max())
-    # y_range = y.max() - y.min()
-    # plt.ylim(y.min() - y_range * 0.1, y.max() + y_range * 0.1)
     plt.savefig(save_name)
