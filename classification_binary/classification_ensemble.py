@@ -23,9 +23,18 @@ print('Define classifiers')
 log_clf = LogisticRegression()
 rnd_clf = RandomForestClassifier()
 svm_clf = SVC()
-voting_clf = VotingClassifier(
-    estimators=[('lr', log_clf), ('rf', rnd_clf), ('svc', svm_clf)],
-    voting='hard')
+svm_clf_with_prob = SVC(probability=True)
+
+voting_strat = 'hard'
+
+if voting_strat == 'hard':
+    voting_clf = VotingClassifier(
+        estimators=[('lr', log_clf), ('rf', rnd_clf), ('svc', svm_clf)],
+        voting='hard')
+if voting_strat == 'soft':
+    voting_clf = VotingClassifier(
+        estimators=[('lr', log_clf), ('rf', rnd_clf), ('svc', svm_clf_with_prob)],
+        voting='soft')
 
 print('Train all of them and check their accuracy')
 for clf in (log_clf, rnd_clf, svm_clf, voting_clf):
