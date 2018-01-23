@@ -1,8 +1,15 @@
 import os
+import sys
 
+import matplotlib.pyplot as plt
+import numpy as np
 from sklearn.datasets import load_iris
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.tree import export_graphviz
+
+sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), '../utils'))
+import my_plots
+
 
 print('Load data')
 iris = load_iris()
@@ -33,3 +40,7 @@ probs = tree_clf.predict_proba([[5, 1.5]])
 print('Probabilities', probs)
 result = tree_clf.predict([[5, 1.5]])
 print('Result', result)
+
+print('Visualize decision boundaries')
+
+my_plots.plot_classifier_training_scatter(X, y, tree_clf, x_label=iris.feature_names[2], y_label=iris.feature_names[3], save_name='decision_boundaries.png')
