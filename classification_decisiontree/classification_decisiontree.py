@@ -1,8 +1,6 @@
 import os
 import sys
 
-import matplotlib.pyplot as plt
-import numpy as np
 from sklearn.datasets import load_iris
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.tree import export_graphviz
