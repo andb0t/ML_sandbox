@@ -2,7 +2,9 @@ import os
 import sys
 
 from sklearn.datasets import make_moons
+from sklearn.ensemble import AdaBoostClassifier
 from sklearn.ensemble import BaggingClassifier
+from sklearn.ensemble import ExtraTreesClassifier
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.ensemble import VotingClassifier
 from sklearn.linear_model import LogisticRegression
@@ -41,20 +43,32 @@ sampling_strat = 'bagging'
 if sampling_strat == 'bagging':
     bag_clf = BaggingClassifier(
         DecisionTreeClassifier(), n_estimators=500,
-        max_samples=100, bootstrap=True, n_jobs=-1)
+        max_samples=100, bootstrap=True, n_jobs=-1,
+        oob_score=True)
 elif sampling_strat == 'pasting':
     bag_clf = BaggingClassifier(
         DecisionTreeClassifier(), n_estimators=500,
         max_samples=100, bootstrap=False, n_jobs=-1)
 
 tree_clf = DecisionTreeClassifier()
+ext_clf = ExtraTreesClassifier()
+ada_clf = AdaBoostClassifier(
+    DecisionTreeClassifier(max_depth=1), n_estimators=200,
+    algorithm='SAMME.R', learning_rate=0.5)
 
 print('Train all of them and check their accuracy')
-for clf in (log_clf, rnd_clf, svm_clf, voting_clf, bag_clf, tree_clf):
+for clf in (log_clf, rnd_clf, svm_clf, voting_clf, bag_clf, tree_clf, ext_clf, ada_clf):
     clf.fit(X_train, y_train)
     y_pred = clf.predict(X_test)
     name = clf.__class__.__name__
     print(name, accuracy_score(y_test, y_pred))
-    my_plots.plot_clf_train_scatter(X_test, y_test, clf,
-                                    title=name,
-                                    save_name='clf_model_' + name + '.png' )
+    my_plots.plot_clf_train_scatter(
+        X_test, y_test, clf,
+        title=name,
+        save_name='clf_model_' + name + '.png')
+
+if sampling_strat == 'bagging':
+    print('Evaluate bagging clf')
+    print('Out-of-bag score:', bag_clf.oob_score_)
+    y_pred = bag_clf.predict(X_test)
+    print('Compared to actual score:', accuracy_score(y_test, y_pred))
