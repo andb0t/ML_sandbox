@@ -12,6 +12,7 @@ from sklearn.svm import SVC
 sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), '../utils'))
 import my_plots
 
+
 print('Generate toy data')
 X, y = make_moons(n_samples=100, noise=0.1, random_state=42)
 

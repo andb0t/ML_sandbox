@@ -24,7 +24,7 @@ def plot_clf_train_scatter(X, y, clf,
         x_range = x.max() - x.min()
         x_min, x_max = x.min() - x_range * 0.1, x.max() + x_range * 0.1
         y_range = y.max() - y.min()
-        x_min, x_max = y.min() - y_range * 0.1, y.max() + y_range * 0.1
+        y_min, y_max = y.min() - y_range * 0.1, y.max() + y_range * 0.1
         xx, yy = np.meshgrid(np.arange(x_min, x_max, h),
                              np.arange(y_min, y_max, h))
         return xx, yy
