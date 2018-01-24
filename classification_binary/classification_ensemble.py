@@ -10,6 +10,7 @@ from sklearn.ensemble import VotingClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
+from sklearn.neighbors import KNeighborsClassifier
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.svm import SVC
 
@@ -52,12 +53,14 @@ elif sampling_strat == 'pasting':
 
 tree_clf = DecisionTreeClassifier()
 ext_clf = ExtraTreesClassifier()
+knb_clf = KNeighborsClassifier()
 ada_clf = AdaBoostClassifier(
     DecisionTreeClassifier(max_depth=1), n_estimators=200,
     algorithm='SAMME.R', learning_rate=0.5)
 
 print('Train all of them and check their accuracy')
-for clf in (log_clf, rnd_clf, svm_clf, voting_clf, bag_clf, tree_clf, ext_clf, ada_clf):
+for clf in (log_clf, rnd_clf, svm_clf, voting_clf, bag_clf, tree_clf, ext_clf,
+            knb_clf, ada_clf):
     clf.fit(X_train, y_train)
     y_pred = clf.predict(X_test)
     name = clf.__class__.__name__
