@@ -18,6 +18,7 @@ tensorflow = "*"
 jupyter = "*"
 scipy = "*"
 pandas = "*"
+tabulate = "*"
 
 
 [requires]

@@ -1,10 +1,12 @@
 import os
 import sys
 
+import tabulate
 from sklearn.datasets import make_moons
 from sklearn.ensemble import AdaBoostClassifier
 from sklearn.ensemble import BaggingClassifier
 from sklearn.ensemble import ExtraTreesClassifier
+from sklearn.ensemble import GradientBoostingClassifier
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.ensemble import VotingClassifier
 from sklearn.linear_model import LogisticRegression
@@ -57,18 +59,26 @@ knb_clf = KNeighborsClassifier()
 ada_clf = AdaBoostClassifier(
     DecisionTreeClassifier(max_depth=1), n_estimators=200,
     algorithm='SAMME.R', learning_rate=0.5)
+grb_clf = GradientBoostingClassifier(learning_rate=1.0, n_estimators=3,
+    max_depth=2)
 
 print('Train all of them and check their accuracy')
+headers = ['Algorithm', 'Accuracy']
+table = []
 for clf in (log_clf, rnd_clf, svm_clf, voting_clf, bag_clf, tree_clf, ext_clf,
-            knb_clf, ada_clf):
+            knb_clf, ada_clf, grb_clf):
     clf.fit(X_train, y_train)
     y_pred = clf.predict(X_test)
     name = clf.__class__.__name__
-    print(name, accuracy_score(y_test, y_pred))
+    accuracy = round(accuracy_score(y_test, y_pred), 3)
+    table.append([name, accuracy])
     my_plots.plot_clf_train_scatter(
         X_test, y_test, clf,
-        title=name,
+        title=name + ' (' + str(accuracy) + ')',
         save_name='clf_model_' + name + '.png')
+
+print(tabulate.tabulate(sorted(table, key=lambda tup: tup[1], reverse=True),
+                        headers=headers, tablefmt='grid'))
 
 if sampling_strat == 'bagging':
     print('Evaluate bagging clf')
