@@ -85,7 +85,7 @@ export_graphviz(
     # feature_names=['y'],
     rounded=True,
     filled=True,
-)
+    )
 os.system('dot -Tpng poly_tree.dot -o poly_tree.png')
 
 print('Use model')
