@@ -5,7 +5,7 @@ from sklearn.datasets import make_swiss_roll
 
 
 print('Load the 3d dataset')
-X, t = make_swiss_roll(n_samples=200, noise=0, random_state=1337)
+X, color = make_swiss_roll(n_samples=200, noise=0, random_state=1337)
 
 y = X[:, 0] < 5
 
