@@ -10,6 +10,7 @@ from sklearn.ensemble import GradientBoostingClassifier
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.ensemble import VotingClassifier
 from sklearn.linear_model import LogisticRegression
+from sklearn.linear_model import Perceptron
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
 from sklearn.neighbors import KNeighborsClassifier
@@ -61,12 +62,13 @@ ada_clf = AdaBoostClassifier(
     algorithm='SAMME.R', learning_rate=0.5)
 grb_clf = GradientBoostingClassifier(learning_rate=1.0, n_estimators=3,
     max_depth=2)
+per_clf = Perceptron(random_state=42)
 
 print('Train all of them and check their accuracy')
 headers = ['Algorithm', 'Accuracy']
 table = []
 for clf in (log_clf, rnd_clf, svm_clf, voting_clf, bag_clf, tree_clf, ext_clf,
-            knb_clf, ada_clf, grb_clf):
+            knb_clf, ada_clf, grb_clf, per_clf):
     clf.fit(X_train, y_train)
     y_pred = clf.predict(X_test)
     name = clf.__class__.__name__
