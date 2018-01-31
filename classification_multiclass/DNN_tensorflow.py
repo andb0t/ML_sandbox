@@ -1,4 +1,4 @@
-import sys
+import os
 
 import numpy as np
 import tensorflow as tf
@@ -39,11 +39,9 @@ saver = tf.train.Saver()
 
 print('Execution phase')
 
-redo_training = input('Redo training? [n]/Y\n')
-
-if redo_training == 'Y':
+if not os.path.isdir("/tmp/data/mnist") or input('Redo training? [n]/Y\n') == 'Y':
     from tensorflow.examples.tutorials.mnist import input_data
-    mnist = input_data.read_data_sets('/tmp/data/')
+    mnist = input_data.read_data_sets('/tmp/data/mnist')
 
     n_epochs = 40
     batch_size = 50
@@ -66,7 +64,7 @@ with tf.Session() as sess:
     saver.restore(sess, './my_model_final.ckpt')
 
     from tensorflow.examples.tutorials.mnist import input_data
-    mnist = input_data.read_data_sets('/tmp/data/')
+    mnist = input_data.read_data_sets('/tmp/data/mnist')
     X_new_scaled = mnist.test.images[0:1]  # TODO: why does [0] not work?
     y_new_scaled = mnist.test.labels[0:1]  # TODO: why does [0] not work?
 
