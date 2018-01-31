@@ -6,6 +6,7 @@ Test area for machine learning algorithms
 * run `jupyter notebook` and connect to `localhost:8888` to work with the jupyter notebooks
 * run the `.py` files with `python3`
 * install the `graphviz` package to get access to visualizations
+* to start the tensorboard server: `tensorboard --logdir [TF_LOG_DIR]`
 
 ## Links
 * [ML jupyter notebooks](https://github.com/ageron/handson-ml)

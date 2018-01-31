@@ -38,8 +38,6 @@ with tf.name_scope('eval'):
 init = tf.global_variables_initializer()
 saver = tf.train.Saver()
 
-
-
 print('Execution phase')
 
 if not os.path.isdir("/tmp/data/mnist") or input('Redo training? [n]/Y\n') == 'Y':
