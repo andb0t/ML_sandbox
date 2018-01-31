@@ -1,5 +1,6 @@
 import sys
 
+import numpy as np
 import tensorflow as tf
 
 
@@ -35,24 +36,40 @@ with tf.name_scope('eval'):
 init = tf.global_variables_initializer()
 saver = tf.train.Saver()
 
-# sys.exit()
 
 print('Execution phase')
 
-from tensorflow.examples.tutorials.mnist import input_data
-mnist = input_data.read_data_sets('/tmp/data/')
+redo_training = input('Redo training? [n]/Y\n')
 
-n_epochs = 40
-batch_size = 50
+if redo_training == 'Y':
+    from tensorflow.examples.tutorials.mnist import input_data
+    mnist = input_data.read_data_sets('/tmp/data/')
+
+    n_epochs = 40
+    batch_size = 50
+
+    with tf.Session() as sess:
+        init.run()
+        for epoch in range(n_epochs):
+            for iteration in range(mnist.train.num_examples // batch_size):
+                X_batch, y_batch = mnist.train.next_batch(batch_size)
+                sess.run(training_op, feed_dict={X: X_batch, y: y_batch})
+            acc_train = accuracy.eval(feed_dict={X: X_batch, y: y_batch})
+            acc_test = accuracy.eval(feed_dict={X: mnist.test.images, y: mnist.test.labels})
+            print(epoch, 'Train accuracy:', acc_train, 'Test accuracy:', acc_test)
+
+        save_path = saver.save(sess, './my_model_final.ckpt')
+
+print('Use the model')
 
 with tf.Session() as sess:
-    init.run()
-    for epoch in range(n_epochs):
-        for iteration in range(mnist.train.num_examples // batch_size):
-            X_batch, y_batch = mnist.train.next_batch(batch_size)
-            sess.run(training_op, feed_dict={X: X_batch, y: y_batch})
-        acc_train = accuracy.eval(feed_dict={X: X_batch, y: y_batch})
-        acc_test = accuracy.eval(feed_dict={X: mnist.test.images, y: mnist.test.labels})
-        print(epoch, 'Train accuracy:', acc_train, 'Test accuracy:', acc_test)
+    saver.restore(sess, './my_model_final.ckpt')
 
-    save_path = saver.save(sess, './my_model_final.ckpt')
+    from tensorflow.examples.tutorials.mnist import input_data
+    mnist = input_data.read_data_sets('/tmp/data/')
+    X_new_scaled = mnist.test.images[0:1]  # TODO: why does [0] not work?
+    y_new_scaled = mnist.test.labels[0:1]  # TODO: why does [0] not work?
+
+    Z = logits.eval(feed_dict={X: X_new_scaled})
+    y_pred = np.argmax(Z, axis=1)
+    print('Prediction:', y_pred, 'Truth:', y_new_scaled)
