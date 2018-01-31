@@ -12,3 +12,7 @@
 # jupyter notebook
 .ipynb_checkpoints
 */.ipynb_checkpoints/*
+
+# tensorflow
+*.ckpt.*
+checkpoint
