@@ -1,4 +1,5 @@
 import os
+from datetime import datetime
 
 import numpy as np
 import tensorflow as tf
@@ -6,6 +7,7 @@ import tensorflow as tf
 
 print('Construction phase')
 
+print(' - construct graph')
 n_inputs = 28 * 28  # MNIST
 n_hidden1 = 300
 n_hidden2 = 100
@@ -37,26 +39,48 @@ init = tf.global_variables_initializer()
 saver = tf.train.Saver()
 
 
+
 print('Execution phase')
 
 if not os.path.isdir("/tmp/data/mnist") or input('Redo training? [n]/Y\n') == 'Y':
+
+    print(' - prepare tensorboard dir')
+    now = datetime.utcnow().strftime('%Y%m%d%H%M%S')
+    root_logdir = 'tf_logs'
+    logdir = '{}/run-{}/'.format(root_logdir, now)
+
+    print(' - prepare tensorboard summary writer')
+    accuracy_summary = tf.summary.scalar('accuracy', accuracy)
+    file_writer = tf.summary.FileWriter(logdir, tf.get_default_graph())
+
+    print(' - load the data')
     from tensorflow.examples.tutorials.mnist import input_data
     mnist = input_data.read_data_sets('/tmp/data/mnist')
 
+    print(' - run the training and save tensorboard summary')
     n_epochs = 40
     batch_size = 50
 
     with tf.Session() as sess:
         init.run()
+        n_batches = mnist.train.num_examples // batch_size
         for epoch in range(n_epochs):
-            for iteration in range(mnist.train.num_examples // batch_size):
+            for batch_index in range(n_batches):
                 X_batch, y_batch = mnist.train.next_batch(batch_size)
                 sess.run(training_op, feed_dict={X: X_batch, y: y_batch})
+
+                if batch_index % 10 == 0:
+                    summary_str = accuracy_summary.eval(feed_dict={X: X_batch, y: y_batch})
+                    step = epoch * n_batches + batch_index
+                    file_writer.add_summary(summary_str, step)
             acc_train = accuracy.eval(feed_dict={X: X_batch, y: y_batch})
             acc_test = accuracy.eval(feed_dict={X: mnist.test.images, y: mnist.test.labels})
             print(epoch, 'Train accuracy:', acc_train, 'Test accuracy:', acc_test)
 
         save_path = saver.save(sess, './my_model_final.ckpt')
+
+    print(' - close tensorboard file writer')
+    file_writer.close()
 
 print('Use the model')
 
@@ -71,3 +95,5 @@ with tf.Session() as sess:
     Z = logits.eval(feed_dict={X: X_new_scaled})
     y_pred = np.argmax(Z, axis=1)
     print('Prediction:', y_pred, 'Truth:', y_new_scaled)
+
+print('To start the tensorboard server: \'tensorboard --logdir tf_logs\'')
