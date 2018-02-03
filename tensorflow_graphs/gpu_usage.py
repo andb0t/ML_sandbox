@@ -9,7 +9,7 @@ def variables_on_cpu(op):
         return '/gpu:0'
 
 
-print('Place operation')
+print('Place operations')
 use_dynamic_placement = False
 if use_dynamic_placement:
     with tf.device(variables_on_cpu):
@@ -23,7 +23,9 @@ else:
     c = a * b
 
 with tf.device('/gpu:1'):
-    d = a + b
+    print('Postpone evaluation of tensor d (in case of untimely high memory consumption)')
+    with tf.control_dependencies([c]):
+        d = a + b
 
 
 print('Configure session')
