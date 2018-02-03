@@ -1,12 +1,30 @@
 import tensorflow as tf
 
 
-print('Place operation')
-with tf.device('/gpu:0'):
-    a = tf.Variable(3.0)
-    b = tf.Variable(4.0)
+def variables_on_cpu(op):
+    print('This op has type', op.type)
+    if op.type == 'Variable':
+        return '/cpu:0'
+    else:
+        return '/gpu:0'
 
-c = a * b
+
+print('Place operation')
+use_dynamic_placement = False
+if use_dynamic_placement:
+    with tf.device(variables_on_cpu):
+        a = tf.Variable(3.0)
+        b = tf.Variable(4.0)    
+        c = a * b
+else:
+    with tf.device('/gpu:0'):
+        a = tf.Variable(3.0)
+        b = tf.Variable(4.0)    
+    c = a * b
+
+with tf.device('/gpu:1'):
+    d = a + b
+
 
 print('Configure session')
 config = tf.ConfigProto()
@@ -16,5 +34,7 @@ sess = tf.Session(config=config)
 
 print('Run session')
 sess.run(tf.global_variables_initializer())
-sess.run(c)
+sess.run([c, d])
+
+print(c, d)
 
