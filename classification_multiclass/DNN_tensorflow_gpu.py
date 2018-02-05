@@ -8,6 +8,8 @@ import tensorflow as tf
 
 start = time.time()
 
+print('This program will distribute the tensorflow graphs on the available gpus')
+
 print('Construction phase')
 
 print(' - construct graph')
@@ -16,15 +18,16 @@ n_hidden1 = 300
 n_hidden2 = 100
 n_outputs = 10
 
-X = tf.placeholder(tf.float32, shape=(None, n_inputs), name='X')
-y = tf.placeholder(tf.int64, shape=(None), name='y')
+with tf.device('/cpu:0'):
+    X = tf.placeholder(tf.float32, shape=(None, n_inputs), name='X')
+    y = tf.placeholder(tf.int64, shape=(None), name='y')
 
-with tf.name_scope('dnn'):
+with tf.name_scope('dnn'), tf.device('/gpu:0'):
     hidden1 = tf.layers.dense(X, n_hidden1, name='hidden1', activation=tf.nn.relu)
     hidden2 = tf.layers.dense(hidden1, n_hidden2, name='hidden2', activation=tf.nn.relu)
     logits = tf.layers.dense(hidden2, n_outputs, name='outputs')
 
-with tf.name_scope('loss'):
+with tf.name_scope('loss'), tf.device('/gpu:1'):
     xentropy = tf.nn.sparse_softmax_cross_entropy_with_logits(labels=y, logits=logits)
     loss = tf.reduce_mean(xentropy, name='loss')
 
@@ -78,7 +81,7 @@ if not os.path.isdir("/tmp/data/mnist") or input('Redo training? [n]/Y\n') == 'Y
             acc_test = accuracy.eval(feed_dict={X: mnist.test.images, y: mnist.test.labels})
             print(epoch, 'Train accuracy:', acc_train, 'Test accuracy:', acc_test)
 
-        save_path = saver.save(sess, './my_model_final.ckpt')
+        save_path = saver.save(sess, './my_model_final_gpu.ckpt')
 
     print(' - close tensorboard file writer')
     file_writer.close()
@@ -86,7 +89,7 @@ if not os.path.isdir("/tmp/data/mnist") or input('Redo training? [n]/Y\n') == 'Y
 print('Use the model')
 
 with tf.Session() as sess:
-    saver.restore(sess, './my_model_final.ckpt')
+    saver.restore(sess, './my_model_final_gpu.ckpt')
 
     from tensorflow.examples.tutorials.mnist import input_data
     mnist = input_data.read_data_sets('/tmp/data/mnist')
