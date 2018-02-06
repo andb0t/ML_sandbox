@@ -97,7 +97,7 @@ with tf.Session() as sess:
     y_pred = np.argmax(Z, axis=1)
     print('Prediction:', y_pred, 'Truth:', y_new_scaled)
 
-print('To start the tensorboard server: \'tensorboard --logdir tf_logs\'')
+print('To start the tensorboard server: \'tensorboard --logdir {}\''.format(root_logdir))
 
 end = time.time()
 print('Duration of program:', end - start)

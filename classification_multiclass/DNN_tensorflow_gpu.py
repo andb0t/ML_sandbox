@@ -50,7 +50,7 @@ if not os.path.isdir("/tmp/data/mnist") or input('Redo training? [n]/Y\n') == 'Y
 
     print(' - prepare tensorboard dir')
     now = datetime.utcnow().strftime('%Y%m%d%H%M%S')
-    root_logdir = 'tf_logs'
+    root_logdir = 'tf_logs_gpu'
     logdir = '{}/run-{}/'.format(root_logdir, now)
 
     print(' - prepare tensorboard summary writer')
@@ -65,7 +65,10 @@ if not os.path.isdir("/tmp/data/mnist") or input('Redo training? [n]/Y\n') == 'Y
     n_epochs = 40
     batch_size = 50
 
-    with tf.Session() as sess:
+    print(' - limit GPU RAM usage')
+    gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=0.5)
+
+    with tf.Session(config=tf.ConfigProto(gpu_options=gpu_options)) as sess:
         init.run()
         n_batches = mnist.train.num_examples // batch_size
         for epoch in range(n_epochs):
@@ -88,7 +91,7 @@ if not os.path.isdir("/tmp/data/mnist") or input('Redo training? [n]/Y\n') == 'Y
 
 print('Use the model')
 
-with tf.Session() as sess:
+with tf.Session(config=tf.ConfigProto(gpu_options=gpu_options)) as sess:
     saver.restore(sess, './my_model_final_gpu.ckpt')
 
     from tensorflow.examples.tutorials.mnist import input_data
@@ -100,7 +103,7 @@ with tf.Session() as sess:
     y_pred = np.argmax(Z, axis=1)
     print('Prediction:', y_pred, 'Truth:', y_new_scaled)
 
-print('To start the tensorboard server: \'tensorboard --logdir tf_logs\'')
+print('To start the tensorboard server: \'tensorboard --logdir {}\''.format(root_logdir))
 
 end = time.time()
 print('Duration of program:', end - start)

@@ -16,4 +16,4 @@
 # tensorflow
 *.ckpt.*
 checkpoint
-tf_logs
+tf_logs*
